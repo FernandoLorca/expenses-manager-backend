@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import express, { Express, Request, Response } from 'express';
 import morgan from 'morgan';
 
@@ -10,5 +12,5 @@ app.get('/', (_: Request, res: Response) => {
   res.send('Hello World');
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
