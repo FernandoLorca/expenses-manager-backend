@@ -1,16 +1,14 @@
-import * as dotenv from 'dotenv';
-dotenv.config();
-import express, { Express, Request, Response } from 'express';
-import morgan from 'morgan';
+import app from './app';
+import { sequelize } from './database/connection';
 
-const app: Express = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(morgan('dev'));
-app.use(express.json());
-
-app.get('/', (_: Request, res: Response) => {
-  res.send('Hello World');
-});
-
-const PORT = process.env.PORT;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const main = async () => {
+  try {
+    await sequelize.sync();
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (error) {
+    console.error(`Unable to connect to the database: ${error}`);
+  }
+};
+main();
