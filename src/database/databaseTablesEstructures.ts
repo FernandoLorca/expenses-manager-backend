@@ -96,6 +96,7 @@ ExpensesCategories.belongsTo(Users, {
 ExpensesCategories.hasMany(Expenses, {
   foreignKey: {
     name: 'category_id',
+    allowNull: false,
   },
   sourceKey: 'id',
 });
@@ -103,6 +104,7 @@ ExpensesCategories.hasMany(Expenses, {
 Expenses.belongsTo(ExpensesCategories, {
   foreignKey: {
     name: 'category_id',
+    allowNull: false,
   },
   targetKey: 'id',
 });
