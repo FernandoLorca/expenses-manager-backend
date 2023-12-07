@@ -27,7 +27,7 @@ export const Expenses = sequelize.define('expenses', {
     primaryKey: true,
     autoIncrement: true,
   },
-  desciption: {
+  description: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -37,21 +37,31 @@ export const Expenses = sequelize.define('expenses', {
   },
 });
 
-export const ExpensesCategories = sequelize.define('expensesCategories', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+export const ExpensesCategories = sequelize.define(
+  'expenses_categories',
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    icon_identifier: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
-  categoryName: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-});
+  {
+    tableName: 'expenses_categories',
+  }
+);
 
 Users.hasMany(Expenses, {
   foreignKey: {
-    name: 'userId',
+    name: 'user_id',
     allowNull: false,
   },
   sourceKey: 'id',
@@ -59,7 +69,7 @@ Users.hasMany(Expenses, {
 
 Expenses.belongsTo(Users, {
   foreignKey: {
-    name: 'userId',
+    name: 'user_id',
     allowNull: false,
   },
   targetKey: 'id',
@@ -67,7 +77,7 @@ Expenses.belongsTo(Users, {
 
 Users.hasMany(ExpensesCategories, {
   foreignKey: {
-    name: 'userId',
+    name: 'user_id',
     allowNull: false,
   },
   sourceKey: 'id',
@@ -75,24 +85,24 @@ Users.hasMany(ExpensesCategories, {
 
 ExpensesCategories.belongsTo(Users, {
   foreignKey: {
-    name: 'userId',
+    name: 'user_id',
     allowNull: false,
   },
   targetKey: 'id',
 });
 
+// ERROR: column "category_id" of relation "expenses_categories" does not exist
+// No sé porque no me esta creando la columna category_id en la tabla expenses_categories.
 ExpensesCategories.hasMany(Expenses, {
   foreignKey: {
-    name: 'categoryId',
-    allowNull: false,
+    name: 'category_id',
   },
   sourceKey: 'id',
 });
 
 Expenses.belongsTo(ExpensesCategories, {
   foreignKey: {
-    name: 'categoryId',
-    allowNull: false,
+    name: 'category_id',
   },
   targetKey: 'id',
 });
