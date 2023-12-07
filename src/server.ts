@@ -1,6 +1,8 @@
 import app from './app';
 import { sequelize } from './database/connection';
-// import './database/databaseTablesEstructures';
+// import './models/users.models';
+// import './models/expenses.models';
+// import './models/expensesCategories.models';
 
 const PORT = process.env.PORT || 3000;
 

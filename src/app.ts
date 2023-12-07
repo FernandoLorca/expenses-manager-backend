@@ -14,6 +14,5 @@ app.get('/', (_: Request, res: Response) => {
 app.use(express.json());
 app.use(cors());
 app.use(morgan('dev'));
-console.log('app.ts');
 
 export default app;
