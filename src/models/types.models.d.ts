@@ -14,7 +14,7 @@ export interface ExpenseInstance
 
 interface UsersAttributes {
   id: number;
-  name: string;
+  name?: string;
   email: string;
   password: string;
 }
