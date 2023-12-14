@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/connection';
 import { Expenses } from './expenses.models';
 import { ExpensesCategories } from './expensesCategories.models';
-import type { UsersInstance } from './types.models';
+import type { UsersInstance } from '../types';
 
 export const Users = sequelize.define<UsersInstance>('users', {
   id: {
