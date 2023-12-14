@@ -40,3 +40,9 @@ export interface ExpensesCategoriesInstance
       ExpensesCategoriesCreationAttributes
     >,
     ExpensesCategoriesAttributes {}
+
+export interface RequestBodyType {
+  email: string;
+  password: string;
+  repeatPassword?: string;
+}
