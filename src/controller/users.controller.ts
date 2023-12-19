@@ -9,6 +9,7 @@ interface NewUser {
     id: number;
     name?: string;
     email: string;
+    admin: boolean;
   };
 }
 
@@ -26,6 +27,7 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
     const newUser: NewUser = await Users.create({
       email,
       password: hashPassword,
+      admin: false,
     });
     const generateToken: string = jwt.sign(
       {

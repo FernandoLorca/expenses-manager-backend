@@ -22,6 +22,10 @@ export const Users = sequelize.define<UsersInstance>('users', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  admin: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
 });
 
 Users.hasMany(Expenses, {

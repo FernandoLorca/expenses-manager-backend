@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../database/connection';
-import { Expenses } from './expenses.models';
-import type { ExpensesCategoriesInstance } from './types.models';
+import type { ExpensesCategoriesInstance } from '../types';
+import { IconsCategories } from './iconsCategory.models';
 
 export const ExpensesCategories = sequelize.define<ExpensesCategoriesInstance>(
   'expenses_categories',
@@ -25,17 +25,17 @@ export const ExpensesCategories = sequelize.define<ExpensesCategoriesInstance>(
   }
 );
 
-ExpensesCategories.hasMany(Expenses, {
+IconsCategories.hasOne(ExpensesCategories, {
   foreignKey: {
-    name: 'category_id',
+    name: 'icon_id',
     allowNull: false,
   },
   sourceKey: 'id',
 });
 
-Expenses.belongsTo(ExpensesCategories, {
+ExpensesCategories.belongsTo(IconsCategories, {
   foreignKey: {
-    name: 'category_id',
+    name: 'icon_id',
     allowNull: false,
   },
   targetKey: 'id',

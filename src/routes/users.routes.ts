@@ -5,16 +5,16 @@ import { usersController } from '../controller/users.controller';
 const usersRouter = Router();
 
 usersRouter.post(
-  '/login',
-  credentialsValidation.emailAndPasswordFormatValidation,
-  credentialsValidation.verificationUserByEmail,
-  credentialsValidation.passwordVerification,
+  '/sign-in',
+  credentialsValidation.signInInputsFormatValidation,
+  credentialsValidation.signInVerificationUserByEmail,
+  credentialsValidation.passwordHashVerification,
   usersController.getUser
 );
 usersRouter.post(
-  '/register',
-  credentialsValidation.emailAndPasswordFormatValidation,
-  credentialsValidation.verificationUserByEmail,
+  '/sign-up',
+  credentialsValidation.signUpInputsFormatValidation,
+  credentialsValidation.signUpVerigicationUserByEmail,
   usersController.createUser
 );
 

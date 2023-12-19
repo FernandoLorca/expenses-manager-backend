@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { Users } from '../models/users.models';
+import { inputsFormatValidation } from '../utilities/inputsFormatValidation';
 import bcrypt from 'bcryptjs';
-import type { RequestBodyType, UsersInstance } from '../types';
+import type {
+  SignInRequestBodyType,
+  SignUpRequestBodyType,
+  UsersInstance,
+} from '../types';
 
 interface CustomRequest extends Request {
   user?: {
@@ -9,41 +14,23 @@ interface CustomRequest extends Request {
   };
 }
 
-const userIsRegistering = (registerParam: string | undefined): boolean =>
-  registerParam ? true : false;
-
-const emailAndPasswordFormatValidation = async (
+const signInInputsFormatValidation = (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
-  const { email, password, repeatPassword }: RequestBodyType = req.body;
+): void => {
+  const { email, password }: SignInRequestBodyType = req.body;
 
-  if (userIsRegistering(repeatPassword)) {
-    if (!email || !password || !repeatPassword) {
-      res.status(400).json({
-        ok: false,
-        status: 400,
-        message: 'Email and password are required',
-      });
-      return;
-    }
-  } else {
-    if (!email || !password) {
-      res.status(400).json({
-        ok: false,
-        status: 400,
-        message: 'Email and password are required',
-      });
-    }
+  if (!email || !password) {
+    res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Email and password are required',
+    });
+    return;
   }
 
-  const emailFormatValidation = (email: string): boolean => {
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return emailRegex.test(email);
-  };
-
-  if (!emailFormatValidation(email)) {
+  if (!inputsFormatValidation.emailFormatValidation(email)) {
     res.status(400).json({
       ok: false,
       status: 400,
@@ -52,7 +39,7 @@ const emailAndPasswordFormatValidation = async (
     return;
   }
 
-  if (password.length < 6 || password.length >= 24) {
+  if (!inputsFormatValidation.passwordFormatValidation(password)) {
     res.status(400).json({
       ok: false,
       status: 400,
@@ -61,11 +48,48 @@ const emailAndPasswordFormatValidation = async (
     return;
   }
 
-  if (repeatPassword && password !== repeatPassword) {
+  next();
+};
+
+const signUpInputsFormatValidation = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  const { email, password, repeatPassword }: SignUpRequestBodyType = req.body;
+
+  if (!email || !password || !repeatPassword) {
     res.status(400).json({
       ok: false,
       status: 400,
-      message: "Password don't match",
+      message: 'Email and passwords are required',
+    });
+    return;
+  }
+
+  if (!inputsFormatValidation.emailFormatValidation(email)) {
+    res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Invalid Email',
+    });
+    return;
+  }
+
+  if (!inputsFormatValidation.passwordFormatValidation(password)) {
+    res.status(400).json({
+      ok: false,
+      status: 400,
+      message: 'Password must be between 6 and 24 characters',
+    });
+    return;
+  }
+
+  if (password !== repeatPassword) {
+    res.status(400).json({
+      ok: false,
+      status: 400,
+      message: "Passwords don't match",
     });
     return;
   }
@@ -73,22 +97,12 @@ const emailAndPasswordFormatValidation = async (
   next();
 };
 
-const verificationUserByEmail = async (
+const signInVerificationUserByEmail = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const { email, repeatPassword }: { email: string; repeatPassword: string } =
-    req.body;
-
-  if (!email) {
-    res.status(400).json({
-      ok: false,
-      status: 400,
-      message: 'Email is required',
-    });
-    return;
-  }
+  const { email }: { email: string } = req.body;
 
   try {
     const user = await Users.findOne({
@@ -97,33 +111,20 @@ const verificationUserByEmail = async (
       },
     });
 
-    if (!userIsRegistering(repeatPassword)) {
-      if (user === null) {
-        res.status(404).json({
-          ok: false,
-          status: 404,
-          message: 'User not found.',
-        });
-        return;
-      }
-
-      (req as CustomRequest).user = {
-        user,
-      };
-
-      next();
-    } else {
-      if (user) {
-        res.status(409).json({
-          ok: false,
-          status: 409,
-          message: 'Email already in use',
-        });
-        return;
-      }
-
-      next();
+    if (user === null) {
+      res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'User not found.',
+      });
+      return;
     }
+
+    (req as CustomRequest).user = {
+      user,
+    };
+
+    next();
   } catch (error: unknown) {
     if (error instanceof Error) {
       res.status(500).json({
@@ -136,7 +137,42 @@ const verificationUserByEmail = async (
   }
 };
 
-const passwordVerification = async (
+const signUpVerigicationUserByEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { email }: { email: string } = req.body;
+
+  try {
+    const user = await Users.findOne({
+      where: {
+        email,
+      },
+    });
+
+    if (user !== null) {
+      res.status(404).json({
+        ok: false,
+        status: 404,
+        message: 'That email is already in use',
+      });
+      return;
+    }
+
+    next();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      res.status(500).json({
+        ok: false,
+        status: 500,
+        message: error.message,
+      });
+    }
+  }
+};
+
+const passwordHashVerification = async (
   req: CustomRequest,
   res: Response,
   next: NextFunction
@@ -172,7 +208,9 @@ const passwordVerification = async (
 };
 
 export const credentialsValidation = {
-  emailAndPasswordFormatValidation,
-  verificationUserByEmail,
-  passwordVerification,
+  signInInputsFormatValidation,
+  signUpInputsFormatValidation,
+  signInVerificationUserByEmail,
+  signUpVerigicationUserByEmail,
+  passwordHashVerification,
 };
